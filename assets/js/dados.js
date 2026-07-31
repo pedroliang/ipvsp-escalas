@@ -191,12 +191,24 @@ window.Escalas = (function () {
 
   /* ---------- leitura de uma aba ---------------------------------- */
 
-  function urlDaAba(min) {
-    var alvo = min.gid != null && min.gid !== ''
-      ? 'gid=' + encodeURIComponent(min.gid)
-      : 'sheet=' + encodeURIComponent(min.aba);
-    return 'https://docs.google.com/spreadsheets/d/' + window.CONFIG.planilhaId +
-      '/gviz/tq?tqx=out:csv&' + alvo + '&_=' + Date.now();
+  // Endereços possíveis para ler uma aba, em ordem de preferência.
+  //
+  // O "export?format=csv" devolve sempre o conteúdo atual da planilha.
+  // O "gviz/tq" é mantido só como reserva: ele aceita buscar a aba pelo nome,
+  // mas o Google guarda a resposta em cache e às vezes entrega dados antigos.
+  function urlsDaAba(min) {
+    var base = 'https://docs.google.com/spreadsheets/d/' + window.CONFIG.planilhaId;
+    var agora = Date.now();
+    var urls = [];
+
+    if (min.gid != null && min.gid !== '') {
+      urls.push(base + '/export?format=csv&gid=' + encodeURIComponent(min.gid) + '&_=' + agora);
+      urls.push(base + '/gviz/tq?tqx=out:csv&gid=' + encodeURIComponent(min.gid) + '&_=' + agora);
+    }
+    if (min.aba) {
+      urls.push(base + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(min.aba) + '&_=' + agora);
+    }
+    return urls;
   }
 
   // Aceita a planilha nas duas orientações:
@@ -238,15 +250,27 @@ window.Escalas = (function () {
   }
 
   function buscarAba(min) {
-    return fetch(urlDaAba(min), { cache: 'no-store' })
-      .then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.text();
-      })
-      .then(function (txt) {
-        if (/<html/i.test(txt)) throw new Error('sem-acesso');
-        return orientar(lerCSV(txt));
-      });
+    var urls = urlsDaAba(min);
+
+    function tentar(i) {
+      if (i >= urls.length) return Promise.reject(new Error('sem-acesso'));
+
+      return fetch(urls[i], { cache: 'no-store' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.text();
+        })
+        .then(function (txt) {
+          if (/<html/i.test(txt)) throw new Error('sem-acesso');
+          return orientar(lerCSV(txt));
+        })
+        .catch(function (e) {
+          if (i + 1 < urls.length) return tentar(i + 1);
+          throw e;
+        });
+    }
+
+    return tentar(0);
   }
 
   /* ---------- montagem do modelo ---------------------------------- */
