@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escalas completas · Igreja Pão da Vida São Paulo</title>
+<meta name="description" content="Todas as datas das escalas de pregação, louvor e cuidando do lar — com busca por pessoa e exportação em PDF.">
+<meta name="theme-color" content="#fbf9f5">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+<div class="env">
+
+  <header class="topo">
+    <div class="topo__int">
+      <a class="topo__logo" href="index.html" aria-label="Igreja Pão da Vida São Paulo">
+        <img src="assets/img/logo.png" alt="Igreja Pão da Vida São Paulo">
+      </a>
+      <nav class="nav">
+        <a href="index.html">Domingo</a>
+        <a href="escalas.html" aria-current="page">Escalas</a>
+        <a href="#pdf">PDF</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- cabeçalho que aparece só no PDF -->
+    <div class="folha-topo" id="folha-topo">
+      <img src="assets/img/logo.png" alt="Igreja Pão da Vida São Paulo">
+      <div class="folha-topo__dir">
+        <span class="folha-topo__titulo">Escalas de serviço</span>
+        <span id="folha-periodo"></span>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <section class="abertura nao-imprime">
+        <div class="abertura__grade">
+          <div>
+            <p class="rotulo rotulo--tijolo">Todas as datas</p>
+            <h1 class="abertura__data">Escalas <em>completas</em></h1>
+            <p class="abertura__meta" id="periodo">—</p>
+          </div>
+        </div>
+      </section>
+
+      <div id="painel" class="nao-imprime" hidden>
+
+        <section class="painel">
+          <h2 class="painel__titulo">Buscar uma pessoa</h2>
+          <p class="painel__ajuda">Digite um nome para ver todas as datas em que a pessoa está escalada.</p>
+          <div class="campos" style="margin-bottom:0">
+            <div class="campo busca">
+              <label for="busca">Nome</label>
+              <input id="busca" type="search" list="nomes" placeholder="ex.: Kathy" autocomplete="off">
+              <datalist id="nomes"></datalist>
+            </div>
+          </div>
+          <div class="resultado" id="resultado"></div>
+        </section>
+
+        <section class="painel" id="pdf">
+          <h2 class="painel__titulo">Escolher e exportar</h2>
+          <p class="painel__ajuda">
+            Marque as escalas e o período que quer ver. A mesma seleção é usada para gerar o PDF.
+          </p>
+
+          <div class="opcoes" id="opcoes-ministerios"></div>
+
+          <div class="campos">
+            <div class="campo">
+              <label for="de">De</label>
+              <select id="de"></select>
+            </div>
+            <div class="campo">
+              <label for="ate">Até</label>
+              <select id="ate"></select>
+            </div>
+            <div class="campo">
+              <label for="atalho">Atalhos</label>
+              <select id="atalho">
+                <option value="tudo">Todas as datas</option>
+                <option value="futuras" selected>Da próxima em diante</option>
+                <option value="4">Próximas 4 semanas</option>
+                <option value="8">Próximas 8 semanas</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="acoes">
+            <button class="btn" type="button" id="gerar">Gerar PDF</button>
+            <span class="acoes__nota">
+              Abre a janela de impressão — escolha <b>Salvar como PDF</b> no destino.
+            </span>
+          </div>
+        </section>
+
+      </div>
+
+      <div id="tabelas">
+        <p class="carregando" id="carregando">Carregando as escalas…</p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="rodape nao-imprime">
+    <div class="container rodape__int">
+      <img src="assets/img/logo.png" alt="">
+      <p style="margin:0">
+        Escalas atualizadas direto da planilha do ministério.
+        <br>
+        <a id="link-planilha" href="#" target="_blank" rel="noopener">Abrir a planilha</a>
+        · <a href="index.html">voltar ao próximo domingo</a>
+      </p>
+    </div>
+  </footer>
+
+</div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/dados.js"></script>
+<script src="assets/js/escalas.js"></script>
+</body>
+</html>
