@@ -8,10 +8,15 @@
 <meta name="theme-color" content="#fbf9f5">
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Escalas IPVSP">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/app.css?v=4">
+<link rel="stylesheet" href="assets/css/app.css?v=5">
 </head>
 <body>
 <div class="env">
@@ -136,6 +141,13 @@
 
   <footer class="rodape nao-imprime">
     <div class="container rodape__int">
+      <button class="btn btn--vazado instalar" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18.5h2"/>
+        </svg>
+        Instalar no celular
+      </button>
       <img src="assets/img/logo.png" alt="">
       <p style="margin:0">
         Escalas atualizadas direto da planilha do ministério.
@@ -148,9 +160,10 @@
 
 </div>
 
-<script src="assets/js/config.js?v=4"></script>
-<script src="assets/js/dados.js?v=4"></script>
-<script src="assets/js/atualizar.js?v=4"></script>
-<script src="assets/js/escalas.js?v=4"></script>
+<script src="assets/js/config.js?v=5"></script>
+<script src="assets/js/dados.js?v=5"></script>
+<script src="assets/js/atualizar.js?v=5"></script>
+<script src="assets/js/instalar.js?v=5"></script>
+<script src="assets/js/escalas.js?v=5"></script>
 </body>
 </html>

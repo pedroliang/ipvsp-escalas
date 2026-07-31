@@ -1,0 +1,47 @@
+{
+  "name": "Escalas · Igreja Pão da Vida São Paulo",
+  "short_name": "Escalas IPVSP",
+  "description": "Quem serve no próximo culto da Igreja Pão da Vida São Paulo — pregação, louvor e cuidando do lar.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "id": "/ipvsp-escalas/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fbf9f5",
+  "theme_color": "#fbf9f5",
+  "categories": ["lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "assets/img/icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/icone-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Próximo domingo",
+      "url": "./index.html",
+      "icons": [{ "src": "assets/img/icone-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Escalas completas",
+      "url": "./escalas.html",
+      "icons": [{ "src": "assets/img/icone-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

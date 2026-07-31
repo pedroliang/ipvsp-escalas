@@ -482,6 +482,98 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; line-height
   border-color: var(--tijolo);
 }
 
+.btn svg { width: 15px; height: 15px; flex: none; }
+
+/* ---------- instalar como app ------------------------------------- */
+
+/* só aparece quando dá para instalar (e some depois de instalado) */
+.instalar { display: none; }
+html.pode-instalar .instalar { display: inline-flex; }
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(23, 21, 15, .42);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.modal--visivel { opacity: 1; }
+
+.modal__caixa {
+  width: 100%;
+  max-width: 430px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--papel);
+  border: 1px solid var(--linha-forte);
+  border-radius: 4px;
+  padding: 26px 26px 24px;
+  box-shadow: 0 24px 60px rgba(23, 21, 15, .3);
+  transform: translateY(10px) scale(.985);
+  transition: transform .22s ease;
+}
+
+.modal--visivel .modal__caixa { transform: none; }
+
+.modal__topo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--linha);
+}
+
+.modal__topo img {
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  border: 1px solid var(--linha);
+  flex: none;
+}
+
+.modal__titulo {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  letter-spacing: -.015em;
+  margin: 0;
+}
+
+.modal__passos {
+  margin: 0;
+  padding: 0 0 0 20px;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.modal__passos li {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--linha);
+}
+
+.modal__passos li:last-child { border-bottom: 0; }
+
+.modal__passos li::marker {
+  font-family: var(--serif);
+  color: var(--tijolo);
+}
+
+.modal__nota {
+  margin: 12px 0 20px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--tinta-3);
+}
+
+.modal__fechar { width: 100%; justify-content: center; }
+
 /* ---------- página de escalas ------------------------------------- */
 
 .painel {

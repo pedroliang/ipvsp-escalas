@@ -173,8 +173,16 @@
     });
 
     html += '</div>' +
-      '<p style="margin:34px 0 0"><a class="btn btn--vazado" href="escalas.html">' +
-      'Ver todas as datas</a></p>' +
+      '<div class="acoes" style="margin-top:34px">' +
+        '<a class="btn btn--vazado" href="escalas.html">Ver todas as datas</a>' +
+        '<button class="btn btn--vazado instalar" type="button">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+          'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<rect x="6" y="2" width="12" height="20" rx="2.5"></rect>' +
+          '<path d="M11 18.5h2"></path></svg>' +
+          'Instalar no celular' +
+        '</button>' +
+      '</div>' +
       '</section></div>';
 
     app.innerHTML = html;
