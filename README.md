@@ -5,8 +5,20 @@ Site das escalas de serviço da igreja. A página inicial mostra quem serve no
 por pessoa e gerar um PDF com as escalas escolhidas.
 
 Os dados vêm direto do Google Sheets. **Não é preciso mexer no site para
-atualizar a escala** — basta editar a planilha, e a mudança aparece no site
-no próximo carregamento da página.
+atualizar a escala** — basta editar a planilha.
+
+## Quando a mudança aparece no site
+
+- **Sozinho, a cada minuto**, enquanto a página estiver aberta.
+- **Na hora**, clicando em **Atualizar** no topo da página.
+- **Ao voltar para a aba** do navegador, se ela ficou parada por um tempo.
+
+O link **Planilha**, também no topo, abre o Google Sheets para quem for editar.
+
+> Se você mudou algo e não viu diferença, confira **em qual coluna de data**
+> a mudança foi feita. A página inicial mostra apenas o **próximo domingo** —
+> alterações em datas passadas só aparecem na página *Escalas*, escolhendo o
+> atalho **"Todas as datas"**.
 
 ---
 
