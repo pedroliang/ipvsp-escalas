@@ -21,6 +21,10 @@ window.CONFIG = {
   // Dia da semana do culto: 0 = domingo, 1 = segunda ... 6 = sábado
   diaDoCulto: 0,
 
+  // De quantos em quantos segundos o site relê a planilha sozinho
+  // (só enquanto a aba está aberta e visível).
+  atualizacaoSegundos: 60,
+
   ministerios: [
     {
       id: 'pregacao',

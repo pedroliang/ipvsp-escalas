@@ -17,11 +17,16 @@
     resultado: document.getElementById('resultado')
   };
 
-  var lp = document.getElementById('link-planilha');
-  if (lp) lp.href = window.CONFIG.planilhaUrl;
+  ['link-planilha', 'nav-planilha'].forEach(function (id) {
+    var a = document.getElementById(id);
+    if (a) a.href = window.CONFIG.planilhaUrl;
+  });
 
   var modelo = null;
   var proxima = -1;
+  // guarda a seleção por data (e não por posição), para sobreviver a
+  // uma atualização em que a planilha ganhou ou perdeu colunas
+  var selecao = { de: null, ate: null };
 
   function esc(s) {
     return String(s == null ? '' : s)
@@ -99,6 +104,10 @@
     var marcados = ministeriosMarcados();
     var f = faixa();
 
+    // memoriza a seleção pelas datas em si
+    selecao.de = modelo.datas[f[0]] ? modelo.datas[f[0]].iso : null;
+    selecao.ate = modelo.datas[f[1]] ? modelo.datas[f[1]].iso : null;
+
     var visiveis = modelo.ministerios.filter(function (m) {
       return marcados.indexOf(m.id) !== -1;
     });
@@ -153,6 +162,20 @@
 
   /* ---------- controles ------------------------------------------- */
 
+  function opcoesDeData() {
+    return modelo.datas.map(function (d, i) {
+      return '<option value="' + i + '">' + esc(d.curta) + ' · ' +
+        esc(d.data.getFullYear()) + '</option>';
+    }).join('');
+  }
+
+  function indiceDoIso(alvo, padrao) {
+    for (var i = 0; i < modelo.datas.length; i++) {
+      if (modelo.datas[i].iso === alvo) return i;
+    }
+    return padrao;
+  }
+
   function montarControles() {
     el.opcoes.innerHTML = modelo.ministerios.map(function (m) {
       return '<label class="opcao">' +
@@ -160,13 +183,8 @@
         esc(m.nome) + '</label>';
     }).join('');
 
-    var opcoesData = modelo.datas.map(function (d, i) {
-      return '<option value="' + i + '">' + esc(d.curta) + ' · ' +
-        esc(d.data.getFullYear()) + '</option>';
-    }).join('');
-
-    el.de.innerHTML = opcoesData;
-    el.ate.innerHTML = opcoesData;
+    el.de.innerHTML = opcoesDeData();
+    el.ate.innerHTML = opcoesDeData();
 
     aplicarAtalho();
 
@@ -175,6 +193,28 @@
     el.ate.addEventListener('change', function () { el.atalho.value = ''; desenharTabelas(); });
     el.atalho.addEventListener('change', function () { aplicarAtalho(); desenharTabelas(); });
     el.gerar.addEventListener('click', function () { window.print(); });
+  }
+
+  // Depois de uma atualização: refaz as listas de datas sem perder a escolha.
+  function refazerControles() {
+    var idsAntes = ministeriosMarcados();
+
+    el.opcoes.innerHTML = modelo.ministerios.map(function (m) {
+      var marcado = !idsAntes.length || idsAntes.indexOf(m.id) !== -1;
+      return '<label class="opcao">' +
+        '<input type="checkbox" value="' + esc(m.id) + '"' + (marcado ? ' checked' : '') + '> ' +
+        esc(m.nome) + '</label>';
+    }).join('');
+
+    el.de.innerHTML = opcoesDeData();
+    el.ate.innerHTML = opcoesDeData();
+
+    if (el.atalho.value) {
+      aplicarAtalho();
+    } else {
+      el.de.value = indiceDoIso(selecao.de, 0);
+      el.ate.value = indiceDoIso(selecao.ate, modelo.datas.length - 1);
+    }
   }
 
   function aplicarAtalho() {
@@ -190,10 +230,13 @@
 
   /* ---------- busca por pessoa ------------------------------------ */
 
-  function montarBusca() {
+  function atualizarListaDeNomes() {
     el.nomes.innerHTML = Escalas.todosOsNomes(modelo)
       .map(function (n) { return '<option value="' + esc(n) + '">'; }).join('');
+  }
 
+  function montarBusca() {
+    atualizarListaDeNomes();
     var timer;
     el.busca.addEventListener('input', function () {
       clearTimeout(timer);
@@ -230,33 +273,45 @@
       }).join('') + '</ul>';
   }
 
-  /* ---------- início ---------------------------------------------- */
+  /* ---------- início e atualizações -------------------------------- */
 
-  Escalas.carregar().then(function (m) {
+  function aplicar(m, primeira) {
     modelo = m;
 
     if (!modelo.datas.length) {
+      el.painel.hidden = true;
       el.tabelas.innerHTML = '<div class="erro"><b>Nenhuma data encontrada.</b>' +
         'Verifique se a primeira linha de cada aba tem as datas dos cultos.</div>';
       return;
     }
 
     proxima = Escalas.proximoIndice(modelo.datas);
-
     el.painel.hidden = false;
-    montarControles();
-    montarBusca();
+
+    if (primeira) {
+      montarControles();
+      montarBusca();
+      window.addEventListener('resize', marcarRolagem);
+    } else {
+      refazerControles();
+      atualizarListaDeNomes();
+    }
+
     desenharTabelas();
+    if (el.busca.value.trim().length >= 2) buscar();
 
-    window.addEventListener('resize', marcarRolagem);
-
-    if (location.hash === '#pdf') {
+    if (primeira && location.hash === '#pdf') {
       document.getElementById('pdf').scrollIntoView({ behavior: 'smooth' });
     }
-  }, function (e) {
-    el.tabelas.innerHTML = '<div class="erro">' +
-      '<b>Não consegui carregar a planilha.</b>' +
-      'Confira se ela está compartilhada como “qualquer pessoa com o link pode ver”. ' +
-      'Detalhe técnico: ' + esc(e && e.message) + '</div>';
+  }
+
+  Atualizador.iniciar({
+    render: aplicar,
+    erro: function (e) {
+      el.tabelas.innerHTML = '<div class="erro">' +
+        '<b>Não consegui carregar a planilha.</b>' +
+        'Confira se ela está compartilhada como “qualquer pessoa com o link pode ver”. ' +
+        'Detalhe técnico: ' + esc(e && e.message) + '</div>';
+    }
   });
 })();

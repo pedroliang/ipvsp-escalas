@@ -9,8 +9,10 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  var lp = document.getElementById('link-planilha');
-  if (lp) lp.href = window.CONFIG.planilhaUrl;
+  ['link-planilha', 'nav-planilha'].forEach(function (id) {
+    var a = document.getElementById(id);
+    if (a) a.href = window.CONFIG.planilhaUrl;
+  });
 
   /* -- pedaços de HTML -------------------------------------------- */
 
@@ -178,10 +180,13 @@
     app.innerHTML = html;
   }
 
-  Escalas.carregar().then(render, function (e) {
-    app.innerHTML = '<div class="container"><div class="erro">' +
-      '<b>Não consegui carregar a planilha.</b>' +
-      'Confira se ela está compartilhada como “qualquer pessoa com o link pode ver”. ' +
-      'Detalhe técnico: ' + esc(e && e.message) + '</div></div>';
+  Atualizador.iniciar({
+    render: render,
+    erro: function (e) {
+      app.innerHTML = '<div class="container"><div class="erro">' +
+        '<b>Não consegui carregar a planilha.</b>' +
+        'Confira se ela está compartilhada como “qualquer pessoa com o link pode ver”. ' +
+        'Detalhe técnico: ' + esc(e && e.message) + '</div></div>';
+    }
   });
 })();

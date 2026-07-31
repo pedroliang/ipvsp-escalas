@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/app.css">
+<link rel="stylesheet" href="assets/css/app.css?v=3">
 </head>
 <body>
 <div class="env">
@@ -25,6 +25,29 @@
         <a href="index.html" aria-current="page">Domingo</a>
         <a href="escalas.html">Escalas</a>
         <a href="escalas.html#pdf">PDF</a>
+
+        <a class="nav__planilha" id="nav-planilha" href="#" target="_blank" rel="noopener"
+           title="Abrir a planilha para editar as escalas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 4h6v6"/><path d="M20 4 11 13"/>
+            <path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>
+          </svg>
+          Planilha
+        </a>
+
+        <span class="topo__sep" aria-hidden="true"></span>
+
+        <button class="recarregar" id="btn-atualizar" type="button"
+                title="Buscar agora as escalas mais recentes da planilha">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-3.2-6.9"/><path d="M21 4v5h-5"/>
+          </svg>
+          <span class="recarregar__txt">Atualizar</span>
+        </button>
+
+        <span class="atualizar__hora" id="hora-atualizacao"></span>
       </nav>
     </div>
   </header>
@@ -41,7 +64,7 @@
       <p style="margin:0">
         Escalas atualizadas direto da planilha do ministério.
         <br>
-        <a id="link-planilha" href="#" target="_blank" rel="noopener">Abrir a planilha</a>
+        <a id="link-planilha" href="#" target="_blank" rel="noopener">Abrir a planilha para editar</a>
         · <a href="escalas.html">ver todas as datas</a>
       </p>
     </div>
@@ -49,8 +72,9 @@
 
 </div>
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/dados.js"></script>
-<script src="assets/js/home.js"></script>
+<script src="assets/js/config.js?v=3"></script>
+<script src="assets/js/dados.js?v=3"></script>
+<script src="assets/js/atualizar.js?v=3"></script>
+<script src="assets/js/home.js?v=3"></script>
 </body>
 </html>
