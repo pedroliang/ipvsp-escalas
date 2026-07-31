@@ -116,10 +116,23 @@
           (min.resumo ? '<span class="secao-tabela__resumo">' + esc(min.resumo) + '</span>' : '') +
         '</div>' +
         tabelaHTML(min, f[0], f[1]) +
+        '<p class="arraste nao-imprime">← arraste a tabela para o lado →</p>' +
         '</section>';
     }).join('');
 
     atualizarPeriodo(f);
+    marcarRolagem();
+  }
+
+  // Mostra o aviso de arrastar só nas tabelas que realmente não cabem na tela.
+  function marcarRolagem() {
+    Array.prototype.forEach.call(
+      el.tabelas.querySelectorAll('.secao-tabela'),
+      function (sec) {
+        var r = sec.querySelector('.rolagem');
+        sec.classList.toggle('tem-rolagem', !!r && r.scrollWidth > r.clientWidth + 4);
+      }
+    );
   }
 
   function atualizarPeriodo(f) {
@@ -234,6 +247,8 @@
     montarControles();
     montarBusca();
     desenharTabelas();
+
+    window.addEventListener('resize', marcarRolagem);
 
     if (location.hash === '#pdf') {
       document.getElementById('pdf').scrollIntoView({ behavior: 'smooth' });
