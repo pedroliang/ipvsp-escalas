@@ -55,6 +55,20 @@ exibidas juntas, como uma lista de nomes.
 
 ---
 
+## Instalar no celular
+
+O botão **Instalar no celular** (no rodapé e abaixo das escalas) coloca um
+ícone com o logo da igreja na tela inicial do aparelho. O site passa a abrir
+em tela cheia, sem a barra do navegador.
+
+- **Android e computador:** o próprio navegador abre a caixa de instalação.
+- **iPhone e iPad:** o botão mostra o passo a passo do
+  *Compartilhar → Adicionar à Tela de Início* (é preciso usar o **Safari**).
+
+Uma vez instalado, o botão some sozinho.
+
+---
+
 ## Como gerar o PDF
 
 Na página **Escalas**, marque quais escalas quer incluir e escolha o período.
