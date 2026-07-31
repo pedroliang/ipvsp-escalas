@@ -47,6 +47,21 @@ A planilha tem três abas — `PREGACAO`, `LOUVOR` e `LAR` — todas no mesmo fo
 Quando o ano não é informado, o site deduz pelo contexto. Se as escalas
 atravessarem a virada do ano, vale escrever o ano ao menos na primeira data.
 
+### Criar, renomear ou remover uma aba
+
+O site lê a planilha inteira e descobre as abas sozinho. Então:
+
+- **Criar uma aba nova** → vira um ministério no site automaticamente.
+- **Renomear uma aba** → o nome muda no site também. O prefixo `Min.` é
+  removido na exibição (`Min. Zeladoria` aparece como **Zeladoria**).
+- **Apagar uma aba** → o ministério some do site.
+
+Uma aba só é considerada escala se tiver **pelo menos duas datas** na
+primeira linha — abas de anotação ficam de fora sem precisar configurar nada.
+
+Se quiser mudar o nome exibido, a frase de apoio ou a ordem dos grupos de um
+ministério, aí sim é em `assets/js/config.js` — mas é opcional.
+
 ### Acrescentar ou remover funções
 
 Basta acrescentar ou apagar linhas na planilha — o site se ajusta sozinho.
