@@ -265,24 +265,29 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; line-height
 
 .escalas { padding-bottom: 72px; }
 
+/* Duas colunas que se preenchem por altura: um bloco curto ao lado de um
+   comprido não deixa espaço vazio embaixo, como aconteceria numa grade. */
 .grade {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  align-items: start;
-  gap: 28px;
+  columns: 2;
+  column-gap: 28px;
 }
 
 .bloco {
-  grid-column: span 12;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  margin: 0 0 28px;
   border: 1px solid var(--linha);
   background: #fff;
   border-radius: 3px;
   overflow: hidden;
 }
 
-.bloco--meio { grid-column: span 6; }
-.bloco--largo { grid-column: span 7; }
-.bloco--estreito { grid-column: span 5; }
+/* ministério de uma função só (a Pregação) ocupa a largura inteira */
+.bloco--cheio {
+  column-span: all;
+  -webkit-column-span: all;
+}
 
 .bloco__topo {
   display: flex;
@@ -824,7 +829,7 @@ table.escala th.agora {
 /* ---------- responsivo -------------------------------------------- */
 
 @media (max-width: 900px) {
-  .bloco--meio, .bloco--largo, .bloco--estreito { grid-column: span 12; }
+  .grade { columns: 1; }
   .abertura { padding: 40px 0 28px; }
   .abertura__grade { grid-template-columns: 1fr; align-items: start; gap: 18px; }
   .selo { text-align: left; display: flex; align-items: baseline; gap: 12px; }

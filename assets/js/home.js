@@ -159,22 +159,10 @@
 
         '<section class="escalas"><div class="grade">';
 
-    // Ministérios de uma função só (a Pregação) ocupam a linha inteira.
-    // Os demais ficam dois por linha — e, se sobrar um sozinho no fim,
-    // ele também se alarga, para não deixar buraco na grade.
-    var comLista = modelo.ministerios.filter(function (m) {
-      return m.funcoes.length > 1;
-    }).length;
-    var vistos = 0;
-
+    // Ministérios de uma função só (a Pregação) ocupam a largura inteira;
+    // os demais se distribuem em duas colunas, encaixando pela altura.
     modelo.ministerios.forEach(function (min, k) {
-      var classe = '';
-      if (min.funcoes.length > 1) {
-        vistos++;
-        var sozinhoNoFim = (vistos === comLista) && (comLista % 2 === 1);
-        if (!sozinhoNoFim) classe = 'bloco--meio';
-      }
-      html += blocoHTML(min, i, k + 1, classe);
+      html += blocoHTML(min, i, k + 1, min.funcoes.length > 1 ? '' : 'bloco--cheio');
     });
 
     html += '</div>' +
