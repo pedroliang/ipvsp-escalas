@@ -1,9 +1,16 @@
 /* =====================================================================
    CONFIGURAÇÃO DO SITE
    ---------------------------------------------------------------------
-   Este é o único arquivo que normalmente precisa ser editado.
-   Para adicionar um novo ministério, copie um bloco de "ministerios"
-   e troque o gid (o número que aparece na URL da aba no Google Sheets).
+   O site descobre as abas da planilha sozinho. Renomear uma aba ou criar
+   um ministério novo JÁ APARECE no site, sem mexer aqui.
+
+   A lista "ministerios" abaixo é só um conjunto de ajustes finos, para
+   quando você quiser mudar o nome exibido, a frase de apoio, a ordem dos
+   grupos de funções ou acrescentar um lembrete. Cada bloco é ligado a uma
+   aba pelo campo "aba" (o prefixo "Min." é ignorado na comparação).
+
+   Uma aba entra no site quando tem pelo menos duas datas na primeira
+   linha. Abas de anotações, portanto, ficam de fora automaticamente.
    ===================================================================== */
 
 window.CONFIG = {
@@ -25,6 +32,13 @@ window.CONFIG = {
   // (só enquanto a aba está aberta e visível).
   atualizacaoSegundos: 60,
 
+  // Abas que nunca devem virar escala no site, mesmo que tenham datas.
+  // Ex.: ignorarAbas: ['Rascunho', 'Contatos']
+  ignorarAbas: [],
+
+  // Ajustes opcionais por aba. Uma aba que não aparecer aqui entra no site
+  // do mesmo jeito, com o nome da própria aba e agrupamento automático.
+  // O "gid" só é usado no modo reserva, se a leitura da planilha falhar.
   ministerios: [
     {
       id: 'pregacao',
@@ -40,7 +54,7 @@ window.CONFIG = {
       nome: 'Louvor',
       resumo: 'Quem conduz e quem toca',
       gid: '0',
-      aba: 'LOUVOR',
+      aba: 'Min. Louvor',
       grupos: [
         { nome: 'Culto em Português', funcoes: ['DIRIGENTE PT', 'VOCAL PT'] },
         { nome: 'Culto em Chinês', funcoes: ['DIRIGENTE CH', 'VOCAL CH'] },
@@ -49,11 +63,11 @@ window.CONFIG = {
       ]
     },
     {
-      id: 'lar',
-      nome: 'Cuidando do Lar',
+      id: 'zeladoria',
+      nome: 'Zeladoria',
       resumo: 'Quem prepara a casa',
       gid: '1206500158',
-      aba: 'LAR',
+      aba: 'Min. Zeladoria',
       grupos: [
         { nome: 'Limpeza e organização', funcoes: ['COLABORADOR 1', 'COLABORADOR 2'] },
         { nome: 'Oferta', funcoes: ['OFERTA 1', 'OFERTA 2'] },
@@ -65,6 +79,16 @@ window.CONFIG = {
       // Lembrete fixo exibido no cartão deste ministério
       lembrete:
         'Ao final, confira o estoque de material de limpeza e da mesa de café e chá — e avise a liderança se algo precisar de reposição.'
+    },
+    {
+      id: 'infantil',
+      nome: 'Infantil',
+      resumo: 'Quem cuida das crianças',
+      gid: '950246262',
+      aba: 'Min. Infantil',
+      // Sem grupos definidos: o site agrupa sozinho as funções numeradas
+      // (PROFESSOR 1, PROFESSOR 2...) conforme você montar a aba.
+      grupos: []
     }
   ],
 

@@ -7,7 +7,7 @@
    não correr o risco de mostrar uma versão velha das escalas.
    ===================================================================== */
 
-var VERSAO = 'ipvsp-escalas-v4';
+var VERSAO = 'ipvsp-escalas-v6';
 
 var ESSENCIAIS = [
   './',
@@ -16,6 +16,7 @@ var ESSENCIAIS = [
   './manifest.webmanifest',
   './assets/css/app.css',
   './assets/js/config.js',
+  './assets/js/planilha.js',
   './assets/js/dados.js',
   './assets/js/atualizar.js',
   './assets/js/instalar.js',

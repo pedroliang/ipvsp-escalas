@@ -2,8 +2,12 @@
    Camada de dados — lê as abas do Google Sheets e devolve um modelo
    pronto para as páginas usarem.
 
-   Não é preciso mexer aqui para o uso do dia a dia: as datas, funções
-   e nomes vêm todos da planilha.
+   Caminho principal: baixa a planilha inteira (.xlsx) e descobre sozinho
+   quais abas existem e como se chamam. Renomear uma aba ou criar um
+   ministério novo já aparece no site, sem mexer em código.
+
+   Caminho reserva: se isso falhar, lê aba por aba em CSV, usando os gid
+   que estão em config.js.
    ===================================================================== */
 
 window.Escalas = (function () {
@@ -29,7 +33,14 @@ window.Escalas = (function () {
     CEIA: 'Ceia',
     MUSICA: 'Música',
     RECEPCAO: 'Recepção',
-    INTERCESSAO: 'Intercessão'
+    INTERCESSAO: 'Intercessão',
+    INFANTIL: 'Infantil',
+    ZELADORIA: 'Zeladoria',
+    DIACONIA: 'Diaconia',
+    BERCARIO: 'Berçário',
+    AUXILIAR: 'Auxiliar',
+    PROFESSOR: 'Professor',
+    PROFESSORA: 'Professora'
   };
 
   // "DIRIGENTE PT" -> "Dirigente PT" ; "PPT PORTUGUES" -> "PPT Português"
@@ -49,13 +60,36 @@ window.Escalas = (function () {
       .join(' ');
   }
 
+  // "Min. Zeladoria" -> "Zeladoria" ; "MINISTÉRIO DE LOUVOR" -> "LOUVOR"
+  function semPrefixo(titulo) {
+    return String(titulo == null ? '' : titulo)
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/^(min\.?|minist(é|e)rios?)\s*(de|do|da|dos|das)?\s*[.:-]?\s*/i, '')
+      .trim();
+  }
+
+  function apelido(titulo) {
+    return chave(semPrefixo(titulo));
+  }
+
+  function identificador(titulo) {
+    return semAcento(semPrefixo(titulo)).toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'aba';
+  }
+
   // "SANTA CEIA 3" -> "SANTA CEIA"  (usado para juntar funções irmãs)
   function base(nomeFuncao) {
     return chave(nomeFuncao).replace(/\s*\d+\s*$/, '').trim();
   }
 
+  function paraTexto(v) {
+    if (v instanceof Date && !isNaN(v)) return curta(v);
+    return String(v == null ? '' : v).trim();
+  }
+
   function vazio(v) {
-    var t = String(v == null ? '' : v).trim();
+    var t = paraTexto(v);
     return t === '' || t === '-' || t === '--' || t === '—' || t === 'x' || t === 'X';
   }
 
@@ -98,6 +132,11 @@ window.Escalas = (function () {
 
   // Devolve {d, m, a} — "a" pode ser null quando a planilha não traz o ano.
   function lerData(bruto) {
+    // vindo do .xlsx, a data já chega pronta
+    if (bruto instanceof Date && !isNaN(bruto)) {
+      return { d: bruto.getDate(), m: bruto.getMonth(), a: bruto.getFullYear() };
+    }
+
     var t = semAcento(bruto).toLowerCase().replace(/\s+/g, ' ').trim().replace(/\.$/, '');
     if (!t) return null;
 
@@ -159,7 +198,7 @@ window.Escalas = (function () {
       data.setHours(0, 0, 0, 0);
       if (isNaN(data)) return null;
       anterior = data;
-      return { data: data, indice: i, texto: String(brutas[i]).trim() };
+      return { data: data, indice: i };
     });
   }
 
@@ -177,47 +216,21 @@ window.Escalas = (function () {
     return String(d.getDate()).padStart(2, '0') + ' ' + MES_CURTO[d.getMonth()];
   }
 
-  function diaDaSemana(d) {
-    return DIA_SEMANA[d.getDay()];
-  }
+  function diaDaSemana(d) { return DIA_SEMANA[d.getDay()]; }
 
-  function hojeZerado() {
-    var h = new Date(); h.setHours(0, 0, 0, 0); return h;
-  }
+  function hojeZerado() { var h = new Date(); h.setHours(0, 0, 0, 0); return h; }
 
-  function diasAte(d) {
-    return Math.round((d - hojeZerado()) / 86400000);
-  }
+  function diasAte(d) { return Math.round((d - hojeZerado()) / 86400000); }
 
-  /* ---------- leitura de uma aba ---------------------------------- */
-
-  // Endereços possíveis para ler uma aba, em ordem de preferência.
-  //
-  // O "export?format=csv" devolve sempre o conteúdo atual da planilha.
-  // O "gviz/tq" é mantido só como reserva: ele aceita buscar a aba pelo nome,
-  // mas o Google guarda a resposta em cache e às vezes entrega dados antigos.
-  function urlsDaAba(min) {
-    var base = 'https://docs.google.com/spreadsheets/d/' + window.CONFIG.planilhaId;
-    var agora = Date.now();
-    var urls = [];
-
-    if (min.gid != null && min.gid !== '') {
-      urls.push(base + '/export?format=csv&gid=' + encodeURIComponent(min.gid) + '&_=' + agora);
-      urls.push(base + '/gviz/tq?tqx=out:csv&gid=' + encodeURIComponent(min.gid) + '&_=' + agora);
-    }
-    if (min.aba) {
-      urls.push(base + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(min.aba) + '&_=' + agora);
-    }
-    return urls;
-  }
+  /* ---------- orientação da aba ------------------------------------ */
 
   // Aceita a planilha nas duas orientações:
   //  A) primeira LINHA com as datas  (é como as abas estão hoje)
   //  B) primeira COLUNA com as datas
-  // Sempre devolve { colunas: [brutoData], linhas: [{funcao, valores[]}] }
+  // Sempre devolve { colunas: [data], linhas: [{funcao, valores[]}] }
   function orientar(grade) {
-    grade = grade.filter(function (l) {
-      return l.some(function (c) { return String(c).trim() !== ''; });
+    grade = (grade || []).filter(function (l) {
+      return l && l.some(function (c) { return paraTexto(c) !== ''; });
     });
     if (!grade.length) return null;
 
@@ -229,7 +242,6 @@ window.Escalas = (function () {
     var primeiraColuna = quantasDatas(grade.slice(1).map(function (l) { return l[0]; }));
 
     if (primeiraColuna > primeiraLinha) {
-      // orientação B — transpõe
       var largura = Math.max.apply(null, grade.map(function (l) { return l.length; }));
       var t = [];
       for (var c = 0; c < largura; c++) {
@@ -242,44 +254,47 @@ window.Escalas = (function () {
     return {
       colunas: cabecalho.slice(1),
       linhas: grade.slice(1)
-        .filter(function (l) { return String(l[0]).trim() !== ''; })
+        .filter(function (l) { return paraTexto(l[0]) !== ''; })
         .map(function (l) {
-          return { funcao: String(l[0]).replace(/\s+/g, ' ').trim(), valores: l.slice(1) };
+          return { funcao: paraTexto(l[0]).replace(/\s+/g, ' '), valores: l.slice(1) };
         })
     };
   }
 
-  function buscarAba(min) {
-    var urls = urlsDaAba(min);
-
-    function tentar(i) {
-      if (i >= urls.length) return Promise.reject(new Error('sem-acesso'));
-
-      return fetch(urls[i], { cache: 'no-store' })
-        .then(function (r) {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.text();
-        })
-        .then(function (txt) {
-          if (/<html/i.test(txt)) throw new Error('sem-acesso');
-          return orientar(lerCSV(txt));
-        })
-        .catch(function (e) {
-          if (i + 1 < urls.length) return tentar(i + 1);
-          throw e;
-        });
-    }
-
-    return tentar(0);
+  // Uma aba só entra no site se parecer mesmo uma escala.
+  function ehEscala(r) {
+    if (!r || !r.linhas.length) return false;
+    var comData = r.colunas.filter(function (v) { return lerData(v); }).length;
+    return comData >= 2;
   }
 
-  /* ---------- montagem do modelo ---------------------------------- */
+  /* ---------- configuração por aba --------------------------------- */
 
-  function montarGrupos(min, funcoes) {
+  function ajustesDaAba(titulo) {
+    var lista = (window.CONFIG && window.CONFIG.ministerios) || [];
+    var alvo = apelido(titulo);
+    for (var i = 0; i < lista.length; i++) {
+      var c = lista[i];
+      if (apelido(c.aba || '') === alvo) return c;
+      if (c.id && identificador(titulo) === c.id) return c;
+      if (c.nome && apelido(c.nome) === alvo) return c;
+    }
+    return null;
+  }
+
+  function ignorada(titulo) {
+    var lista = (window.CONFIG && window.CONFIG.ignorarAbas) || [];
+    var alvo = apelido(titulo);
+    return lista.some(function (n) { return apelido(n) === alvo; });
+  }
+
+  /* ---------- grupos ------------------------------------------------ */
+
+  function montarGrupos(cfg, funcoes) {
     var usadas = {};
     var grupos = [];
 
-    (min.grupos || []).forEach(function (g) {
+    ((cfg && cfg.grupos) || []).forEach(function (g) {
       var itens = [];
       g.funcoes.forEach(function (nome) {
         var f = funcoes.find(function (x) { return x.chave === chave(nome); });
@@ -314,84 +329,150 @@ window.Escalas = (function () {
     return grupos;
   }
 
-  function carregar() {
-    var mins = window.CONFIG.ministerios;
+  /* ---------- montagem do modelo ----------------------------------- */
+
+  // entradas: [{ titulo, cfg, dados|null, erro|null }]
+  function montarModelo(entradas) {
+    var mapa = {};
+
+    var preparadas = entradas.map(function (e) {
+      if (!e.dados) return e;
+      e.datas = resolverAnos(e.dados.colunas);
+      e.datas.forEach(function (d) { if (d) mapa[iso(d.data)] = d.data; });
+      return e;
+    });
+
+    var datasOrdenadas = Object.keys(mapa).sort().map(function (k) {
+      var d = mapa[k];
+      return {
+        iso: k, data: d,
+        curta: curta(d), extenso: porExtenso(d), diaSemana: diaDaSemana(d)
+      };
+    });
+
+    var indicePorIso = {};
+    datasOrdenadas.forEach(function (d, i) { indicePorIso[d.iso] = i; });
+
+    var ministerios = preparadas.map(function (e) {
+      var cfg = e.cfg || {};
+
+      var funcoes = ((e.dados && e.dados.linhas) || []).map(function (l) {
+        var valores = new Array(datasOrdenadas.length).fill('');
+        (e.datas || []).forEach(function (d) {
+          if (!d) return;
+          var pos = indicePorIso[iso(d.data)];
+          if (pos == null) return;
+          var v = l.valores[d.indice];
+          valores[pos] = vazio(v) ? '' : paraTexto(v);
+        });
+        return {
+          funcao: l.funcao,
+          chave: chave(l.funcao),
+          rotulo: rotular(l.funcao),
+          valores: valores
+        };
+      });
+
+      return {
+        id: cfg.id || identificador(e.titulo),
+        nome: cfg.nome || rotular(semPrefixo(e.titulo)),
+        resumo: cfg.resumo || null,
+        lembrete: cfg.lembrete || null,
+        aba: e.titulo,
+        erro: e.erro || null,
+        funcoes: funcoes,
+        grupos: montarGrupos(cfg, funcoes),
+        preenchido: funcoes.some(function (f) {
+          return f.valores.some(function (v) { return v !== ''; });
+        })
+      };
+    });
+
+    return { datas: datasOrdenadas, ministerios: ministerios };
+  }
+
+  /* ---------- caminho principal: planilha inteira ------------------- */
+
+  function viaPlanilha() {
+    if (!window.Planilha) return Promise.reject(new Error('sem-leitor'));
+
+    return window.Planilha.ler().then(function (abas) {
+      var entradas = [];
+
+      abas.forEach(function (aba) {
+        if (ignorada(aba.nome)) return;
+        var r = orientar(aba.grade);
+        if (!ehEscala(r)) return;
+        entradas.push({ titulo: aba.nome, cfg: ajustesDaAba(aba.nome), dados: r, erro: null });
+      });
+
+      if (!entradas.length) throw new Error('nenhuma-aba-de-escala');
+      return montarModelo(entradas);
+    });
+  }
+
+  /* ---------- caminho reserva: CSV por aba -------------------------- */
+
+  function urlsDaAba(min) {
+    var b = 'https://docs.google.com/spreadsheets/d/' + window.CONFIG.planilhaId;
+    var agora = Date.now();
+    var urls = [];
+    if (min.gid != null && min.gid !== '') {
+      urls.push(b + '/export?format=csv&gid=' + encodeURIComponent(min.gid) + '&_=' + agora);
+      urls.push(b + '/gviz/tq?tqx=out:csv&gid=' + encodeURIComponent(min.gid) + '&_=' + agora);
+    }
+    if (min.aba) {
+      urls.push(b + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(min.aba) + '&_=' + agora);
+    }
+    return urls;
+  }
+
+  function buscarAba(min) {
+    var urls = urlsDaAba(min);
+
+    function tentar(i) {
+      if (i >= urls.length) return Promise.reject(new Error('sem-acesso'));
+      return fetch(urls[i], { cache: 'no-store' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.text();
+        })
+        .then(function (txt) {
+          if (/<html/i.test(txt)) throw new Error('sem-acesso');
+          return orientar(lerCSV(txt));
+        })
+        .catch(function (e) {
+          if (i + 1 < urls.length) return tentar(i + 1);
+          throw e;
+        });
+    }
+
+    return tentar(0);
+  }
+
+  function viaCsv() {
+    var mins = (window.CONFIG && window.CONFIG.ministerios) || [];
+    if (!mins.length) return Promise.reject(new Error('sem-configuracao'));
 
     return Promise.all(mins.map(function (m) {
       return buscarAba(m).then(
-        function (r) { return { ok: true, dados: r }; },
-        function (e) { return { ok: false, erro: e && e.message }; }
-      );
-    })).then(function (respostas) {
-      // As datas do site são a união das datas de todas as abas.
-      var mapa = {};
-
-      var porMinisterio = respostas.map(function (resp, k) {
-        var min = mins[k];
-        if (!resp.ok || !resp.dados) {
-          return { config: min, erro: resp.erro || 'vazia', datas: [], funcoes: [] };
+        function (r) { return { titulo: m.aba || m.nome, cfg: m, dados: r, erro: null }; },
+        function (e) {
+          return { titulo: m.aba || m.nome, cfg: m, dados: null, erro: (e && e.message) || 'erro' };
         }
-        var datas = resolverAnos(resp.dados.colunas);
-        datas.forEach(function (d) {
-          if (d) mapa[iso(d.data)] = d.data;
-        });
-        return { config: min, erro: null, datas: datas, linhas: resp.dados.linhas };
-      });
-
-      var datasOrdenadas = Object.keys(mapa).sort().map(function (k) {
-        var d = mapa[k];
-        return {
-          iso: k,
-          data: d,
-          curta: curta(d),
-          extenso: porExtenso(d),
-          diaSemana: diaDaSemana(d)
-        };
-      });
-
-      var indicePorIso = {};
-      datasOrdenadas.forEach(function (d, i) { indicePorIso[d.iso] = i; });
-
-      var ministerios = porMinisterio.map(function (m) {
-        var funcoes = (m.linhas || []).map(function (l) {
-          var valores = new Array(datasOrdenadas.length).fill('');
-          (m.datas || []).forEach(function (d) {
-            if (!d) return;
-            var pos = indicePorIso[iso(d.data)];
-            if (pos == null) return;
-            var v = l.valores[d.indice];
-            valores[pos] = vazio(v) ? '' : String(v).trim();
-          });
-          return {
-            funcao: l.funcao,
-            chave: chave(l.funcao),
-            rotulo: rotular(l.funcao),
-            valores: valores
-          };
-        });
-
-        return {
-          id: m.config.id,
-          nome: m.config.nome,
-          resumo: m.config.resumo,
-          lembrete: m.config.lembrete || null,
-          aba: m.config.aba,
-          erro: m.erro,
-          funcoes: funcoes,
-          grupos: montarGrupos(m.config, funcoes),
-          preenchido: funcoes.some(function (f) {
-            return f.valores.some(function (v) { return v !== ''; });
-          })
-        };
-      });
-
-      return { datas: datasOrdenadas, ministerios: ministerios };
+      );
+    })).then(function (entradas) {
+      if (entradas.every(function (e) { return !e.dados; })) throw new Error('sem-acesso');
+      return montarModelo(entradas);
     });
+  }
+
+  function carregar() {
+    return viaPlanilha().catch(function () { return viaCsv(); });
   }
 
   /* ---------- consultas ------------------------------------------- */
 
-  // Índice do próximo culto (hoje conta, se hoje for dia de culto).
   function proximoIndice(datas) {
     var hoje = hojeZerado();
     for (var i = 0; i < datas.length; i++) {
@@ -400,7 +481,6 @@ window.Escalas = (function () {
     return -1;
   }
 
-  // Separa "Luquinhas (PT) / Elias (CH)" em duas pessoas.
   function pessoas(valor) {
     if (!valor) return [];
     return String(valor).split(/\s*[\/;]\s*/)
@@ -408,7 +488,6 @@ window.Escalas = (function () {
       .filter(Boolean);
   }
 
-  // Nome puro, sem observações entre parênteses — usado na busca.
   function nomeLimpo(pessoa) {
     return pessoa.replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim();
   }
@@ -426,10 +505,8 @@ window.Escalas = (function () {
           });
           if (bate) {
             achados.push({
-              data: modelo.datas[i],
-              ministerio: min.nome,
-              funcao: f.rotulo,
-              valor: v
+              data: modelo.datas[i], ministerio: min.nome,
+              funcao: f.rotulo, valor: v
             });
           }
         });

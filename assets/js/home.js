@@ -159,15 +159,20 @@
 
         '<section class="escalas"><div class="grade">';
 
-    var larguras = ['bloco--largo', 'bloco--estreito'];
-    var contador = 0;
+    // Ministérios de uma função só (a Pregação) ocupam a linha inteira.
+    // Os demais ficam dois por linha — e, se sobrar um sozinho no fim,
+    // ele também se alarga, para não deixar buraco na grade.
+    var comLista = modelo.ministerios.filter(function (m) {
+      return m.funcoes.length > 1;
+    }).length;
+    var vistos = 0;
 
     modelo.ministerios.forEach(function (min, k) {
-      var classe;
-      if (min.funcoes.length === 1) {
-        classe = '';                                   // ocupa a largura toda
-      } else {
-        classe = larguras[contador % 2]; contador++;
+      var classe = '';
+      if (min.funcoes.length > 1) {
+        vistos++;
+        var sozinhoNoFim = (vistos === comLista) && (comLista % 2 === 1);
+        if (!sozinhoNoFim) classe = 'bloco--meio';
       }
       html += blocoHTML(min, i, k + 1, classe);
     });

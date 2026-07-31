@@ -280,6 +280,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; line-height
   overflow: hidden;
 }
 
+.bloco--meio { grid-column: span 6; }
 .bloco--largo { grid-column: span 7; }
 .bloco--estreito { grid-column: span 5; }
 
@@ -823,7 +824,7 @@ table.escala th.agora {
 /* ---------- responsivo -------------------------------------------- */
 
 @media (max-width: 900px) {
-  .bloco--largo, .bloco--estreito { grid-column: span 12; }
+  .bloco--meio, .bloco--largo, .bloco--estreito { grid-column: span 12; }
   .abertura { padding: 40px 0 28px; }
   .abertura__grade { grid-template-columns: 1fr; align-items: start; gap: 18px; }
   .selo { text-align: left; display: flex; align-items: baseline; gap: 12px; }
