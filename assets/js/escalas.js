@@ -80,9 +80,14 @@
     });
     html += '</tr></thead><tbody>';
 
+    var linhas = 0;
+
     for (var i = ini; i <= fim; i++) {
       var d = modelo.datas[i];
       if (!d) continue;
+      // cada escala mostra só as datas que ela própria tem na planilha
+      if (min.presenca && !min.presenca[i]) continue;
+      linhas++;
       var destaque = (i === proxima) ? ' class="proxima"' : '';
       html += '<tr' + destaque + '><th scope="row">' +
         esc(d.curta) + ' <span class="obs" style="color:var(--tinta-3);font-size:11px">' +
@@ -95,6 +100,10 @@
           : '<td class="vaga">—</td>';
       });
       html += '</tr>';
+    }
+
+    if (!linhas) {
+      return '<p class="aviso">Esta escala não tem datas dentro do período escolhido.</p>';
     }
 
     return html + '</tbody></table></div>';

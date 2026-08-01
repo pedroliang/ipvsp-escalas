@@ -79,6 +79,12 @@
       return html;
     }
 
+    // a aba nem tem coluna para esta data (ex.: escala quinzenal ou diária)
+    if (min.presenca && !min.presenca[i]) {
+      html += '<p class="aviso">Esta escala não tem esta data na planilha.</p></section>';
+      return html;
+    }
+
     var temAlgo = min.funcoes.some(function (f) { return f.valores[i]; });
 
     if (!temAlgo) {
@@ -121,7 +127,7 @@
   /* -- render ------------------------------------------------------ */
 
   function render(modelo) {
-    var i = Escalas.proximoIndice(modelo.datas);
+    var i = Escalas.proximoCulto(modelo.datas);
 
     if (i === -1) {
       var ultima = modelo.datas[modelo.datas.length - 1];

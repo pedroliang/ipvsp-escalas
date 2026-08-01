@@ -356,6 +356,14 @@ window.Escalas = (function () {
     var ministerios = preparadas.map(function (e) {
       var cfg = e.cfg || {};
 
+      // quais datas do site esta aba realmente tem como coluna
+      var presenca = new Array(datasOrdenadas.length).fill(false);
+      (e.datas || []).forEach(function (d) {
+        if (!d) return;
+        var pos = indicePorIso[iso(d.data)];
+        if (pos != null) presenca[pos] = true;
+      });
+
       var funcoes = ((e.dados && e.dados.linhas) || []).map(function (l) {
         var valores = new Array(datasOrdenadas.length).fill('');
         (e.datas || []).forEach(function (d) {
@@ -380,6 +388,7 @@ window.Escalas = (function () {
         lembrete: cfg.lembrete || null,
         aba: e.titulo,
         erro: e.erro || null,
+        presenca: presenca,
         funcoes: funcoes,
         grupos: montarGrupos(cfg, funcoes),
         preenchido: funcoes.some(function (f) {
@@ -473,12 +482,27 @@ window.Escalas = (function () {
 
   /* ---------- consultas ------------------------------------------- */
 
+  // Próxima data da lista, seja ela qual for.
   function proximoIndice(datas) {
     var hoje = hojeZerado();
     for (var i = 0; i < datas.length; i++) {
       if (datas[i].data >= hoje) return i;
     }
     return -1;
+  }
+
+  // Próximo dia de culto (domingo, por padrão). É o que a página inicial usa,
+  // para que uma escala com datas diárias — uma corrente de oração, por
+  // exemplo — não puxe o panorama para um dia de semana.
+  function proximoCulto(datas) {
+    var dia = (window.CONFIG && window.CONFIG.diaDoCulto);
+    if (dia == null) dia = 0;
+
+    var hoje = hojeZerado();
+    for (var i = 0; i < datas.length; i++) {
+      if (datas[i].data >= hoje && datas[i].data.getDay() === dia) return i;
+    }
+    return proximoIndice(datas);      // nenhuma data cai no dia de culto
   }
 
   function pessoas(valor) {
@@ -533,6 +557,7 @@ window.Escalas = (function () {
   return {
     carregar: carregar,
     proximoIndice: proximoIndice,
+    proximoCulto: proximoCulto,
     pessoas: pessoas,
     nomeLimpo: nomeLimpo,
     escalasDe: escalasDe,
