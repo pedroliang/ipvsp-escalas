@@ -60,11 +60,29 @@
     return html + '</div>';
   }
 
-  function blocoHTML(min, i, ordem, classe) {
+  // Escalas que não seguem só o dia de culto (a Oração, que é dia a dia)
+  // ganham a data em destaque, para não restar dúvida do que está na tela.
+  function escalaIrregular(min, datas) {
+    if (!min.presenca) return false;
+    var dia = (window.CONFIG && window.CONFIG.diaDoCulto);
+    if (dia == null) dia = 0;
+    return datas.some(function (d, k) {
+      return min.presenca[k] && d.data.getDay() !== dia;
+    });
+  }
+
+  function blocoHTML(min, i, ordem, classe, datas) {
+    var d = datas[i];
+    var marcarData = d && escalaIrregular(min, datas);
+
     var html = '<section class="bloco ' + classe + '">' +
       '<div class="bloco__topo">' +
       '<span class="bloco__num">' + String(ordem).padStart(2, '0') + '</span>' +
       '<h2 class="bloco__nome">' + esc(min.nome) + '</h2>' +
+      (marcarData
+        ? '<span class="bloco__data">' + esc(d.diaSemana.replace('-feira', '')) +
+          ', ' + esc(d.curta) + '</span>'
+        : '') +
       (min.resumo ? '<span class="bloco__resumo">' + esc(min.resumo) + '</span>' : '') +
       '</div>';
 
@@ -168,7 +186,8 @@
     // Ministérios de uma função só (a Pregação) ocupam a largura inteira;
     // os demais se distribuem em duas colunas, encaixando pela altura.
     modelo.ministerios.forEach(function (min, k) {
-      html += blocoHTML(min, i, k + 1, min.funcoes.length > 1 ? '' : 'bloco--cheio');
+      html += blocoHTML(min, i, k + 1,
+        min.funcoes.length > 1 ? '' : 'bloco--cheio', modelo.datas);
     });
 
     html += '</div>' +
