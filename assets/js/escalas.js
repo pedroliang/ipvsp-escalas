@@ -80,9 +80,22 @@
     });
     html += '</tr></thead><tbody>';
 
+    // Corta o rabo de datas ainda em branco: a tabela vai até a última data
+    // que tem alguém escalado. Quando o responsável preencher mais adiante,
+    // as datas seguintes aparecem sozinhas.
+    var ultima = -1;
+    for (var k = fim; k >= ini; k--) {
+      var temAlguem = min.funcoes.some(function (f) { return f.valores[k]; });
+      if (temAlguem) { ultima = k; break; }
+    }
+
+    if (ultima < 0) {
+      return '<p class="aviso">Nenhuma data preenchida ainda neste período.</p>';
+    }
+
     var linhas = 0;
 
-    for (var i = ini; i <= fim; i++) {
+    for (var i = ini; i <= ultima; i++) {
       var d = modelo.datas[i];
       if (!d) continue;
       // cada escala mostra só as datas que ela própria tem na planilha

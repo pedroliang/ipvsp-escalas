@@ -7,7 +7,7 @@
    não correr o risco de mostrar uma versão velha das escalas.
    ===================================================================== */
 
-var VERSAO = 'ipvsp-escalas-v10';
+var VERSAO = 'ipvsp-escalas-v11';
 
 var ESSENCIAIS = [
   './',
